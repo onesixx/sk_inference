@@ -6,20 +6,34 @@ from  pycaret.classification import (
     setup, compare_models, save_model,
     load_model, predict_model)
 
+# Load the data
 penguins_df = load_penguins()
+
+# Setup data & compare models
 s = setup(data=penguins_df, target='species', session_id= 666)
 best = compare_models()
-save_model(best, 'lightgbm')
+save_model(best, 'penguins_best')
 
-loaded_pipeline = load_model('lightgbm')
-new_data = pd.DataFrame({'island': ['Biscoe'],
-                         'culmen_length_mm': [50.5],
-                         'culmen_depth_mm': [15.1],
+
+####################
+# Inference
+loaded_pipeline = load_model('penguins_best')
+# Predict
+infer_data = pd.DataFrame({'island': ['Biscoe'],
+                         'bill_length_mm': [50.5],
+                         'bill_depth_mm': [15.1],
                          'flipper_length_mm': [210],
                          'body_mass_g': [5000],
-                         'sex': ['MALE']
+                         'sex': ['MALE'],
+                         'year': [None]
                         })
-new_pred = predict_model(loaded_pipeline, new_data)
+new_pred = predict_model(loaded_pipeline, infer_data)
+new_pred
 
+# Predict on a sample of 5 rows
 new_df = penguins_df.sample(5)
-new_pred = predict_model(loaded_pipeline, new_df)
+for index, row in new_df.iterrows() :
+    df = pd.DataFrame(row).transpose()
+    new = predict_model(loaded_pipeline, data=df)
+    print("--------------------")
+    print(new.iloc[:,0])
